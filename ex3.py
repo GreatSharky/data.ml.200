@@ -23,16 +23,16 @@ class Perceptron:
         for j, w in enumerate(self.weights):
             sum = 0
             for i, y in enumerate(y_pred):
-                sum += (y_true[i] - y_pred[i])*(y_true[i]-y_pred[i]*(1-y_pred[i])*4)
+                sum += (y_true[i] - y_pred[i])*(-y_pred[i]*(1-y_pred[i])*self.inputs[i][j])
             w_new = self.weights[j] - self.lr*2/len(y_pred)*sum
             self.weights[j] = w_new
         for i, y in enumerate(y_pred):
-            sum += (y_true[i] - y_pred[i])*(y_true[i]-y_pred[i]*(1-y_pred[i]))
+            sum += (y_true[i] - y_pred[i])*(-y_pred[i]*(1-y_pred[i]))
         self.bias = self.bias - self.lr*2/len(y_pred)
         return self.bias, self.weights
 
 def main():
-    w = [5,5,5]
+    w = [0,0,0]
     data = np.array([[0,1,1],
                   [0,0,0],
                   [1,0,0],
@@ -43,7 +43,7 @@ def main():
                   [1,1,1]])
 
     lr = .2
-    a = Perceptron(w,-5,lr)
+    a = Perceptron(w,0,lr)
     epoch = 2010
     y_t = np.array([0,0,0,0,0,0,0,1])
     target = .4
