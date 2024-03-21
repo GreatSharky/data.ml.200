@@ -1,56 +1,45 @@
 import numpy as np
 
-def logsig(x):
-    return 1/(1+np.exp(-x))
+data = np.array([[0,1,1],
+                [0,0,0],
+                [1,0,0],
+                [1,1,0],
+                [1,0,1],
+                [0,0,1],
+                [0,1,0],
+                [1,1,1]])
+x1 = np.transpose(data)[0]
+x2 = np.transpose(data)[1]
+x3 = np.transpose(data)[2]
+trues = np.array([0,0,0,0,0,0,0,1])
+N = len(trues)
+w1 = 0
+w2 = 0
+w3 = 0
+w0 = 0
+lr = .5
 
-class Perceptron:
-    def __init__(self, weights: list, weight0: float, lr) -> None:
-        self.weights = weights
-        self.bias = weight0
-        self.lr = lr
+def logsig(a):
+    return 1/(1+np.exp(-a))
+
+epochs = 20000
+pred = []
+for i in range(epochs):
+    pred = logsig(w1*x1 + w2*x2 + w3*x3+w0)
+
+    sum_w1 = np.sum(2*(trues-pred)*-pred*(1-pred)*x1)
+    nabla_w1 = 1/N*sum_w1
+    w1 = w1 - lr*nabla_w1
+    nabla_w2 = 1/N*np.sum(2*(trues-pred)*-pred*(1-pred)*x2)
+    w2 = w2 - lr*nabla_w2
+    sum_w3 = np.sum(2*(trues-pred)*-pred*(1-pred)*x3)
+    nabla_w3 = 1/N*sum_w3
+    w3 = w3 - lr *nabla_w3
+    nabla_w0 = 1/N*np.sum(2*(trues-pred)*-pred*(1-pred))
+    w0 = w0 - lr *nabla_w0
+
+    if i % 2000 == 0:
+        print(1/N*np.sum((trues-pred)**2))
     
-    def forward_pass(self, inputs):
-        a = self.bias
-        self.inputs = inputs
-        y_pred = []
-        for i in self.inputs:
-            for j , w in enumerate(self.weights):
-                a += self.weights[j] * i[j]
-            y_pred.append(logsig(a))
-        return y_pred
-
-    def update(self, y_pred, y_true):
-        for j, w in enumerate(self.weights):
-            sum = 0
-            for i, y in enumerate(y_pred):
-                sum += (y_true[i] - y_pred[i])*(y_true[i]-y_pred[i]*(1-y_pred[i])*4)
-            w_new = self.weights[j] - self.lr*2/len(y_pred)*sum
-            self.weights[j] = w_new
-        for i, y in enumerate(y_pred):
-            sum += (y_true[i] - y_pred[i])*(y_true[i]-y_pred[i]*(1-y_pred[i]))
-        self.bias = self.bias - self.lr*2/len(y_pred)
-        return self.bias, self.weights
-
-def main():
-    w = [5,5,5]
-    data = np.array([[0,1,1],
-                  [0,0,0],
-                  [1,0,0],
-                  [1,1,0],
-                  [1,0,1],
-                  [0,0,1],
-                  [0,1,0],
-                  [1,1,1]])
-
-    lr = .2
-    a = Perceptron(w,-5,lr)
-    epoch = 2010
-    y_t = np.array([0,0,0,0,0,0,0,1])
-    target = .4
-    for j in range(epoch):
-        y_p = a.forward_pass(data)
-        a.update(y_p, y_t)
-        if j % 500 == 0:
-            print(y_p)
-
-main()
+print(pred)
+print(trues[7]-pred[7])
