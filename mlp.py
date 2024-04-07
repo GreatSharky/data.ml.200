@@ -1,12 +1,12 @@
-from sklearn.dummy import DummyClassifier
 from torchvision.transforms import transforms
 from torchvision.datasets import ImageFolder
 import torch.utils.data as torchdata
 from torch import nn
 import torch
 import os
+from PIL import Image
 
-BATCH = 4
+BATCH = 32
 
 device = torch.device('cuda')
 
@@ -41,7 +41,7 @@ model = Network().to(device)
 print(model)
 
 loss_func = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=.01)
+optimizer = torch.optim.SGD(model.parameters(), lr=.06)
 
 def train(data, model, loss_fn, optimizer):
     model.train()
@@ -54,7 +54,6 @@ def train(data, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-    print(loss)
 
 def test(data, model, loss_fn):
     num_batches = len(data)
@@ -72,9 +71,27 @@ def test(data, model, loss_fn):
     acc = correct/size
     print(f"Acc: {acc} Avg loss: {test_loss:>8f} \n")
 
+def evaluate(model):
+    file = input("Eval file:")
+    if not file:
+        file = "001.jpg"
+    trasnfrom = transforms.Compose([
+        transforms.Resize((64,64)),
+        transforms.ToTensor()
+    ])
+
+    img = Image.open(file)
+    img = trasnfrom(img)
+    img = img.to(device)
+    img_tensor = img.unsqueeze(0)
+    pred = model(img_tensor)   
+    print(pred)
+    input()
+
 epochs = 10
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
     train(train_data, model, loss_func, optimizer)
     test(test_data, model, loss_func)
+    #evaluate(model)
 print("Done!")
